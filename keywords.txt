@@ -1,0 +1,23 @@
+# Datatypes (KEYWORD1)
+SFM_Module	KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+
+enable	KEYWORD2
+disable	KEYWORD2
+setPinInterrupt	KEYWORD2
+pinInterrupt	KEYWORD2
+isTouched	KEYWORD2
+isConnected	KEYWORD2
+getUserCount	KEYWORD2
+getUuid	KEYWORD2
+sendCmd	KEYWORD2
+setRingColor	KEYWORD2
+register_3c3r_1st	KEYWORD2
+register_3c3r_2nd	KEYWORD2
+register_3c3r_3rd	KEYWORD2
+deleteUser	KEYWORD2
+deleteAllUser	KEYWORD2
+recognition_1v1	KEYWORD2
+recognition_1vN	KEYWORD2
+stopAll	KEYWORD2
