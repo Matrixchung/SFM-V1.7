@@ -14,21 +14,30 @@ char hex_char[17] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
            Pin number for UART_TX
     @param txPin
            Pin number for UART_RX
-    @param uartIndex
+    @param uartIndex (only useful for ESP32 platform)
            HardwareSerial uart_nr, default 1 means UART 1 (UART 0 is preconfigured and can't be used)
     @return SFM_Module object
     @note Remember to call SFM_Module::setPinInterrupt() before loop()! (see example for more information)
  */
+#if defined(ESP32)
 SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t txPin, uint8_t uartIndex):sfmSerial(uartIndex), vcc_pin(vccPin), irq_pin(irqPin), rx_pin(rxPin), tx_pin(txPin){
   pinMode(irq_pin, INPUT_PULLDOWN);
   pinMode(vcc_pin, OUTPUT);
-  pinMode(rx_pin, OUTPUT);
-  pinMode(tx_pin, OUTPUT);
   digitalWrite(vcc_pin, HIGH); // Enable sensor vcc
   cmdBuffer[0] = 0xF5;
   cmdBuffer[7] = 0xF5;
   sfmSerial.begin(115200, SERIAL_8N1, rx_pin, tx_pin);
 }
+#else
+SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t txPin, uint8_t uartIndex):sfmSerial(rxPin, txPin), vcc_pin(vccPin), irq_pin(irqPin), rx_pin(rxPin), tx_pin(txPin){
+  pinMode(irq_pin, INPUT);
+  pinMode(vcc_pin, OUTPUT);
+  digitalWrite(vcc_pin, HIGH); // Enable sensor vcc
+  cmdBuffer[0] = 0xF5;
+  cmdBuffer[7] = 0xF5;
+  sfmSerial.begin(115200);
+}
+#endif
 SFM_Module::~SFM_Module(){
   detachInterrupt(irq_pin);
 }
@@ -187,7 +196,12 @@ uint8_t SFM_Module::sendCmd(uint8_t cmdType, uint8_t p1, uint8_t p2, uint8_t p3,
 void SFM_Module::setPinInterrupt(void (*pinInt)(void)){
   attachInterrupt(digitalPinToInterrupt(irq_pin), pinInt, CHANGE);
 }
-void IRAM_ATTR SFM_Module::pinInterrupt(){
+#if defined(ESP32)
+void IRAM_ATTR SFM_Module::pinInterrupt()
+#else
+void SFM_Module::pinInterrupt()
+#endif
+{
   touched = digitalRead(irq_pin);
 }
 bool SFM_Module::isTouched(){

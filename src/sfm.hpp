@@ -9,8 +9,12 @@
 #define _SFM_HPP__
 
 #include "Arduino.h"
+#if defined(ESP32)
 #include "HardwareSerial.h"
-#include "string"
+#else
+#include "SoftwareSerial.h"
+#endif
+#include "string.h"
 
 #define SFM_SERIAL_TIMEOUT    8000  // serial timeout (ms)
 #define SFM_DEFAULT_USERROLE  0x03  // Default user role for register
@@ -47,7 +51,11 @@ public:
   void enable();
   void disable();
   void setPinInterrupt(void (*pinInt)(void));
+  #if defined(ESP32)
   void IRAM_ATTR pinInterrupt();
+  #else
+  void pinInterrupt();
+  #endif
   bool isTouched();
   bool isConnected();
   uint16_t getUserCount();
@@ -68,7 +76,11 @@ protected:
   uint8_t _getCheckSum(uint8_t *buffer);
   uint8_t _getDataPackage(String &package);
   uint8_t _getCmdReturn(uint8_t cmdType, uint8_t p1 = 0x00, uint8_t p2 = 0x00, uint8_t p3 = 0x00);
+  #if defined(ESP32)
   HardwareSerial sfmSerial;
+  #else
+  SoftwareSerial sfmSerial;
+  #endif
   uint8_t cmdBuffer[8] = {0};
   uint8_t ackBuffer[8] = {0};
   bool touched = false;
