@@ -129,7 +129,7 @@ uint8_t SFM_Module::recognition_1vN(uint16_t &returnUid){
   q3 = sendCmd(0x0C, 0x00, 0x00, 0x00, ackType, q1, q2);
   if(ackType == 0x0C){
     returnUid = (q1 << 8) | q2;
-    return returnUid == 0 ? SFM_ACK_FAIL : SFM_ACK_SUCCESS;
+    return (returnUid == 0 && q3 != SFM_ACK_SUCCESS) ? SFM_ACK_FAIL : SFM_ACK_SUCCESS;
   }
   return SFM_ACK_FAIL;
 }
@@ -176,7 +176,15 @@ uint8_t SFM_Module::sendCmd(uint8_t cmdType, uint8_t p1, uint8_t p2, uint8_t p3,
   unsigned int timer = SFM_SERIAL_TIMEOUT;
   while(timer--){
     if(sfmSerial.available() >= 8){
-      while(sfmSerial.peek() != 0xF5) sfmSerial.read(); // trim the cache to find first 0xF5 (ack start)
+      unsigned int trimTimer = SFM_SERIAL_TIMEOUT;
+      while(sfmSerial.peek() != 0xF5 && trimTimer--){
+        sfmSerial.read(); // trim the cache to find first 0xF5 (ack start)
+      }
+      if(!trimTimer) {
+        while(sfmSerial.available()) sfmSerial.read(); // flush buffer
+        sfmSerial.flush();
+        return SFM_ACK_SERIALTIMEOUT;
+      }
       if(sfmSerial.available() >= 8){ // more than 8 bytes since the first 0xF5
         sfmSerial.readBytes(ackBuffer, 8);
         if(ackBuffer[6] == _getCheckSum(ackBuffer)){ // checksum matched, exit without flush buffer
@@ -185,7 +193,11 @@ uint8_t SFM_Module::sendCmd(uint8_t cmdType, uint8_t p1, uint8_t p2, uint8_t p3,
           q2 = ackBuffer[3];
           return ackBuffer[4]; // return q3 as SFM_ACK
         }
-        else return SFM_ACK_FAIL;
+        else {
+          while(sfmSerial.available()) sfmSerial.read(); // flush buffer
+          sfmSerial.flush();
+          return SFM_ACK_FAIL;
+        }
       }
     }
     delay(1);
