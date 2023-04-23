@@ -66,7 +66,7 @@ uint8_t SFM_Module::setRingColor(uint8_t startColor, int8_t endColor, uint16_t p
     @note Please check example for how to register using 3C3R method.
  */
 uint8_t SFM_Module::register_3c3r_1st(uint16_t uid){
-  return _getCmdReturn(0x01, uid >> 8, uid << 8, SFM_DEFAULT_USERROLE);
+  return _getCmdReturn(0x01, (uid >> 8) & 0xFF, uid & 0xFF, SFM_DEFAULT_USERROLE);
 }
 /*!
     @brief 3C3R Register step #2
@@ -100,7 +100,7 @@ uint8_t SFM_Module::register_3c3r_3rd(uint16_t &returnUid){
     @return SFM_ACK_XXX
  */
 uint8_t SFM_Module::deleteUser(uint16_t uid){
-  return _getCmdReturn(0x04, uid >> 8, uid << 8);
+  return _getCmdReturn(0x04, (uid >> 8) & 0xFF, uid & 0xFF);
 }
 /*!
     @brief Delete ALL user(s)
@@ -116,7 +116,7 @@ uint8_t SFM_Module::deleteAllUser(){
     @return SFM_ACK_SUCCESS if matched
  */
 uint8_t SFM_Module::recognition_1v1(uint16_t uid){
-  return _getCmdReturn(0x0B, uid >> 8, uid << 8);
+  return _getCmdReturn(0x0B, (uid >> 8) & 0xFF, uid & 0xFF);
 }
 /*!
     @brief Search the database and find matched uid
