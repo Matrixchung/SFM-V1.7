@@ -28,6 +28,15 @@ SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t tx
   cmdBuffer[7] = 0xF5;
   sfmSerial.begin(115200, SERIAL_8N1, rx_pin, tx_pin);
 }
+#elif defined(ARDUINO_AVR_PROMICRO16)
+SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, HardwareSerial &hs):sfmSerial(hs), vcc_pin(vccPin), irq_pin(irqPin){
+  pinMode(irq_pin, INPUT);
+  pinMode(vcc_pin, OUTPUT);
+  digitalWrite(vcc_pin, HIGH); // Enable sensor vcc
+  cmdBuffer[0] = 0xF5;
+  cmdBuffer[7] = 0xF5;
+  sfmSerial.begin(115200);
+}
 #else
 SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t txPin, uint8_t uartIndex):sfmSerial(rxPin, txPin), vcc_pin(vccPin), irq_pin(irqPin), rx_pin(rxPin), tx_pin(txPin){
   pinMode(irq_pin, INPUT);
