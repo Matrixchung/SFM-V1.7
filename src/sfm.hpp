@@ -80,8 +80,10 @@ protected:
   uint8_t _getCheckSum(uint8_t *buffer);
   uint8_t _getDataPackage(String &package);
   uint8_t _getCmdReturn(uint8_t cmdType, uint8_t p1 = 0x00, uint8_t p2 = 0x00, uint8_t p3 = 0x00);
-#if defined(ESP32) || defined(ARDUINO_AVR_PROMICRO16)
+#if defined(ESP32)
   HardwareSerial sfmSerial;
+#elif defined(ARDUINO_AVR_PROMICRO16)
+  HardwareSerial &sfmSerial;
 #else
   SoftwareSerial sfmSerial;
 #endif

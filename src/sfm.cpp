@@ -35,7 +35,9 @@ SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, HardwareSerial &hs):sfmSe
   digitalWrite(vcc_pin, HIGH); // Enable sensor vcc
   cmdBuffer[0] = 0xF5;
   cmdBuffer[7] = 0xF5;
-  sfmSerial.begin(115200);
+  sfmSerial.begin(115200, SERIAL_8N1);
+  while (!Serial1)
+    delay(100);
 }
 #else
 SFM_Module::SFM_Module(uint8_t vccPin, uint8_t irqPin, uint8_t rxPin, uint8_t txPin, uint8_t uartIndex):sfmSerial(rxPin, txPin), vcc_pin(vccPin), irq_pin(irqPin), rx_pin(rxPin), tx_pin(txPin){
@@ -209,7 +211,11 @@ uint8_t SFM_Module::sendCmd(uint8_t cmdType, uint8_t p1, uint8_t p2, uint8_t p3,
         }
       }
     }
+#if defined(ARDUINO_AVR_PROMICRO16)
+    delay(2);
+#else
     delay(1);
+#endif
   }
   while(sfmSerial.available()) sfmSerial.read(); // flush buffer
   return SFM_ACK_SERIALTIMEOUT;
